@@ -25,8 +25,8 @@ function getdata(req,res)
   console.log(req.query)
   var bound=100;
   if(req.query!=undefined && req.query.bound!=undefined)
-    max=req.query.bound;
-  var val=Math.floor(Math.random()*(max*2+1))-max;
+  bound=req.query.bound;
+  var val=Math.floor(Math.random()*(bound*2+1))-bound;
   if(queue.length>10)
     queue.shift();
   queue.push(val);
