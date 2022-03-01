@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+  
+</head>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.js" integrity="sha512-Lii3WMtgA0C0qmmkdCpsG0Gjr6M0ajRyQRQSbTF6BsrVh/nhZdHpVZ76iMIPvQwz1eoXC3DmAg9K51qT5/dEVg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<body onload="loadData()">
+  <canvas id="myChart" width="600" height="400"></canvas>
+  <script>
+  function loadData()
+  {
+    let request=new XMLHttpRequest();
+    request.open("GET","http://127.0.0.1:3000/iot/hist");
+    request.send();
+    request.onload=()=>{
+      console.log(request);
+      if(request.status==200)
+      {
+        var dd=JSON.parse(request.response);
+        var i;
+        for(i=0;i<dd.data.length;i++)
+        {
+          myChart.data.datasets[0].data.shift();
+          myChart.data.datasets[0].data.push(dd.data[i]);
+        }
+        myChart.update();
+        setTimeout(loadData,1000);
+      }
+    }
+    
+  }
+  const ctx = document.getElementById('myChart').getContext('2d');    
+    
+  const myChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+            labels: ['-19','-18','-17', '-16', '-15', '-14', '-13', '-12', '-11', '-10', '-9', '-8', '-7', '-6','-5', '-4', '-3', '-2', '-1', '0'],
+            datasets: [{
+                label: 'Random',
+                data: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                borderColor: 'rgb(255, 0, 0)',
+                backgroundColor: 'rgb(255, 255, 255)',
+                borderWidth: 2
+            }]
+        },
+        options: {
+          animation : false,
+      responsive: true,
+        plugins: {
+          legend: {
+            position: 'top',
+          },
+          title: {
+            display: true,
+            text: 'Running Chart'
+          }
+        }
+    }
+  });
+  </script>
+
+</body>
+</html>

@@ -13,6 +13,7 @@ const PORT = process.env.PORT || 3000
   .set('views', path.join(__dirname, 'views'))
   .set('view engine', 'ejs')
   .get('/', (req, res) => res.render('pages/index'))
+  .get('/iot/view', (req, res) => res.render('pages/view'))
   .get('/iot',getdata)
   .get('/iot/hist',gethistory)
   .listen(PORT, () => console.log(`Listening on ${ PORT }`))
