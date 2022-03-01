@@ -19,22 +19,30 @@ const PORT = process.env.PORT || 3000
 
 
 var queue=[];
-
+var NUM=20;
 function getdata(req,res)
 {
   console.log(req.query)
   var bound=100;
   if(req.query!=undefined && req.query.bound!=undefined)
   bound=req.query.bound;
-  var val=Math.floor(Math.random()*(bound*2+1))-bound;
-  if(queue.length>10)
+  var val=0;
+  do
+  {
+    val=Math.floor(Math.random()*(bound*2+1))-bound;
+    queue.push(val);
+  }while((queue.length<NUM));
+
+  if(queue.length>NUM)
     queue.shift();
-  queue.push(val);
   res.json ({"val":val});
 }
 
 function gethistory(req,res)
 {
+  var bound=100;
+  while(queue.length<NUM)
+    queue.push(Math.floor(Math.random()*(bound*2+1))-bound);
 
-  res.json ({"data":queue});
+    res.json ({"data":queue});
 }
