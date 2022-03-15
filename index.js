@@ -20,12 +20,17 @@ const PORT = process.env.PORT || 3000
   .get('/iot/view', (req, res) => res.render('pages/view'))
   .get('/iot/dashboard', (req, res) => res.render('pages/dashboard'))
   .get('/iot',getdata)
+
   .get('/iot/control',control)
   .get('/iot/control/:did',control)
   .post('/iot/control',control)
+  
   .get('/iot/nosie',get_sin_data)
   .get('/iot/sin',get_sin_data)
+  
+  .get('/iot/power',get_tan_data)
   .get('/iot/tan',get_tan_data)
+  
   .get('/iot/temperature',get_temperature)
   .get('/iot/hist',gethistory)
   .get('/iot/list',get_device_list)
@@ -144,7 +149,7 @@ function get_sin_data(req,res)
   15*Math.sin(minutes*Math.PI/30)+
   10*Math.sin(seconds*Math.PI/30)
 
-  res.json ({"val":val,"timestamp":now});
+  res.json ({"val":val,unit:"dBm","timestamp":now});
 }
 
 function get_tan_data(req,res)
@@ -155,7 +160,7 @@ function get_tan_data(req,res)
   let seconds=now.getSeconds();
   let val=30*Math.tan((seconds/61)*(Math.PI/4))
 
-  res.json ({"val":val,"timestamp":now});
+  res.json ({"val":val,unit:"kW h","timestamp":now});
 }
 
 function gethistory(req,res)
