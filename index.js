@@ -25,7 +25,7 @@ const PORT = process.env.PORT || 3000
   .get('/iot/control/:did',control)
   .post('/iot/control',control)
   
-  .get('/iot/nosie',get_sin_data)
+  .get('/iot/noise',get_sin_data)
   .get('/iot/sin',get_sin_data)
   
   .get('/iot/power',get_tan_data)
