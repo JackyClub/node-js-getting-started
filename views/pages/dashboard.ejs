@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html>
+<head>
+  
+</head>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.js" integrity="sha512-Lii3WMtgA0C0qmmkdCpsG0Gjr6M0ajRyQRQSbTF6BsrVh/nhZdHpVZ76iMIPvQwz1eoXC3DmAg9K51qT5/dEVg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<body onload="loadData()">
+  <table border=1>
+    <tr>
+      <td>Sensor<br>
+        <canvas id="myChart1" width="600" height="300"></canvas>
+      </td>
+      <td>Electric<br>
+        <canvas id="myChart2" width="600" height="300"></canvas>
+      </td>
+    </tr>
+    <tr valign="top">
+      <td>Nosie<br>
+        <canvas id="myChart3" width="600" height="300"></canvas>
+      </td>
+      <td >Control<br><br>
+        ROOM 1<input type="button" id="room1_btn"  onclick=clicked(1,0) value="ON/OFF">
+        <input type="button" onclick=clicked(1,10) value="+">
+        <input type=text id=room1_val value="0" maxlength="4" size="4">
+        <input type="button" onclick=clicked(1,-10) value="-">
+        <br><br>
+        
+        ROOM 2<input type="button" id="room2_btn"  onclick=clicked(2,0) value="ON/OFF">
+        <input type="button" onclick=clicked(2,10) value="+">
+        <input type=text id=room2_val value="0" maxlength="4" size="4">
+        <input type="button" onclick=clicked(2,-10) value="-">
+        <br><br>
+
+        ROOM 3<input type="button" id="room3_btn"  onclick=clicked(3,0) value="ON/OFF">
+        <input type="button" onclick="clicked(3,10)" value="+">
+        <input type=text id=room3_val value="0" maxlength="4" size="4">
+        <input type="button" onclick=clicked(3,-10) value="-">
+      </td>
+    </tr>
+    </table>
+  <script>
+
+  function clicked(action,value)
+  {
+    value=parseInt(value);
+    
+    let this_val='room'+action+'_val';
+    let this_btn='room'+action+'_btn';
+    let val=document.getElementById(this_val).value;
+    let btn=document.getElementById(this_btn).value;
+    val=parseInt(val)+value;
+    if(val>100)val=100;
+    if(val<10)val=10;
+    let body;
+    if(value==0)
+      body={did:'room'+action,status:btn!="ON"};
+    else
+      body={did:'room'+action,status:true,value:val};
+    let request=new XMLHttpRequest();
+    request.open("POST","/iot/control");
+    request.send(JSON.stringify(body));  
+
+  }
+
+  function loadData()
+  {
+    loadData1();
+    loadData2();
+    loadData3();
+  }
+
+  function loadData1()
+  {
+    let request=new XMLHttpRequest();
+    request.open("GET","/iot/hist");
+    request.send();
+    request.onload=()=>{
+      console.log(request);
+      if(request.status==200)
+      {
+        var resp=JSON.parse(request.response);
+        var i;
+        for(i=0;i<resp.data.length;i++)
+        {
+          myChart1.data.datasets[0].data.shift();
+          myChart1.data.datasets[0].data.push(resp.data[i]);
+        }
+        myChart1.update();
+        
+        let next=new XMLHttpRequest();
+        next.open("GET","/iot");
+        next.send();
+        setTimeout(loadData1,1000);
+      }
+    }    
+  }
+  function loadData2()
+  {
+    let request=new XMLHttpRequest();
+    request.open("GET","/iot/control");
+    request.responseType='json';
+    request.send();
+    request.onload=()=>{
+      if(request.status==200)
+      {
+        request.response.forEach(element => {
+          if(element.did=='room1')
+          {
+            myChart2.data.datasets[0].data[0]=element.status?element.value:0;
+            document.getElementById('room1_btn').value=element.status?"ON":"OFF";
+            document.getElementById('room1_val').value=myChart2.data.datasets[0].data[0];
+          }
+          if(element.did=='room2')
+          {
+            myChart2.data.datasets[0].data[1]=element.status?element.value:0;
+            document.getElementById('room2_btn').value=element.status?"ON":"OFF";
+            document.getElementById('room2_val').value=myChart2.data.datasets[0].data[1];
+          }
+          if(element.did=='room3')
+          {
+            myChart2.data.datasets[0].data[2]=element.status?element.value:0;
+            document.getElementById('room3_btn').value=element.status?"ON":"OFF";
+            document.getElementById('room3_val').value=myChart2.data.datasets[0].data[2];
+          }
+        });
+        myChart2.update();
+        setTimeout(loadData2,1000);
+      }
+    }  
+  }
+
+  function loadData3()
+  {
+    let request=new XMLHttpRequest();
+    request.open("GET","/iot/sin");
+    request.responseType='json';
+    request.send();
+    request.onload=()=>{
+      console.log(request);
+      if(request.status==200)
+      {
+        myChart3.data.datasets[0].data.shift();
+        myChart3.data.datasets[0].data.push(request.response.val);
+        myChart3.update();
+        setTimeout(loadData3,1000);
+      }
+    }    
+
+  }
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+  const ctx = document.getElementById('myChart1').getContext('2d');    
+   
+  const myChart1 = new Chart(ctx, {
+      type: 'line',
+      data: {
+            labels: ['-19','-18','-17', '-16', '-15', '-14', '-13', '-12', '-11', '-10', '-9', '-8', '-7', '-6','-5', '-4', '-3', '-2', '-1', '0'],
+            datasets: [{
+                label: 'Random',
+                data: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                borderColor: 'rgb(255, 0, 0)',
+                backgroundColor: 'rgb(255, 255, 255)',
+                borderWidth: 2
+            }]
+        },
+        options: {
+          animation : false,
+      responsive: false,
+        plugins: {
+          legend: {
+            position: 'top',
+          },
+          title: {
+            display: true,
+            text: 'Running Chart'
+          }
+        }
+    }
+  });
+
+  const ctx2 = document.getElementById('myChart2').getContext('2d');    
+   
+  const myChart2 = new Chart(ctx2, {
+      type: 'doughnut',
+      data: {
+            labels: ['Room 1','Room 2','Room 3'],
+            datasets: [{
+                data: [10,10,10],
+                borderColor: 'rgb(255, 255, 255)',
+                backgroundColor:['rgb(255, 99, 132)',
+                                 'rgb(54, 162, 235)',
+                                 'rgb(255, 205, 86)'],
+                hoverOffset:4
+            }]
+        },
+        options: {
+          animation : false,
+      responsive: false,
+        plugins: {
+          legend: {
+            position: 'top',
+          },
+          title: {
+            display: true,
+            text: 'Power - Current'
+          }
+        }
+    }
+  });
+
+  const ctx3 = document.getElementById('myChart3').getContext('2d');    
+
+  const myChart3 = new Chart(ctx3, {
+      type: 'line',
+      data: {
+            labels: ['-29', '-28', '-27', '-26','-25', '-24', '-23', '-22', '-21', '-20','-19','-18','-17', '-16', '-15', '-14', '-13', '-12', '-11', '-10', '-9', '-8', '-7', '-6','-5', '-4', '-3', '-2', '-1', '0'],
+            datasets: [{
+                label: 'Nosie',
+                data: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                borderColor: 'rgb(0, 255, 0)',
+                backgroundColor: 'rgb(255, 255, 255)',
+                borderWidth: 2
+            }]
+        },
+        options: {
+          animation : false,
+      responsive: false,
+        plugins: {
+          legend: {
+            position: 'top',
+          },
+          title: {
+            display: true,
+            text: 'Environmental'
+          }
+        }
+    }
+  });
+
+
+  </script>
+
+</body>
+</html>
