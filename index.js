@@ -434,7 +434,7 @@ request(url,{json:true},(err,res,body)=>{
   }
 });
 
-if(process.env.REMOTE_HOST===undefined)
+if(process.env.REMOTE_HOST!==undefined)
 {
 
 const axios = require('axios')
